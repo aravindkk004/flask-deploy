@@ -58,39 +58,44 @@ def vectorize_and_save(chunks):
 
 @app.route("/api/analyze_pdf", methods=["POST"])
 def analyze_pdf():
-    # getting data from frontend
-    if 'file' not in request.files:
-        return jsonify({'error': 'No file part in the request'}), 400
+    try:
+        print("I am in backend")
+        # getting data from frontend
+        if 'file' not in request.files:
+            return jsonify({'error': 'No file part in the request'}), 400
 
-    pdf_file = request.files['file']
-    if pdf_file.filename == '':
-        return jsonify({'error': 'No selected file'}), 400
-    
-    if not pdf_file.filename.lower().endswith('.pdf'):
-        return jsonify({'error': 'Invalid file type. Only PDF allowed.'}), 400
-    
-    # extracting text from pdf 
-    pdf_text = extract_text_from_pdf(pdf_file)
+        pdf_file = request.files['file']
+        if pdf_file.filename == '':
+            return jsonify({'error': 'No selected file'}), 400
+        
+        if not pdf_file.filename.lower().endswith('.pdf'):
+            return jsonify({'error': 'Invalid file type. Only PDF allowed.'}), 400
+        
+        # extracting text from pdf 
+        pdf_text = extract_text_from_pdf(pdf_file)
 
-    # split into chunks 
-    chunks = split_into_chunks(pdf_text)
+        # split into chunks 
+        chunks = split_into_chunks(pdf_text)
 
-    # Vectorize and save FAISS index
-    vectorstore = vectorize_and_save(chunks)
+        # Vectorize and save FAISS index
+        vectorstore = vectorize_and_save(chunks)
 
-    session_id = str(uuid.uuid4())
-    # Store vectorstore with timestamp for cleanup
-    current_app.session_vectorstores[session_id] = {
-        "vectorstore": vectorstore,
-        "timestamp": time.time()
-    }
+        session_id = str(uuid.uuid4())
+        # Store vectorstore with timestamp for cleanup
+        current_app.session_vectorstores[session_id] = {
+            "vectorstore": vectorstore,
+            "timestamp": time.time()
+        }
 
-    # Return session ID to frontend
-    return jsonify({
-        "status": "success",
-        "message": "PDF analyzed successfully.",
-        "session_id": session_id
-    })
+        # Return session ID to frontend
+        return jsonify({
+            "status": "success",
+            "message": "PDF analyzed successfully.",
+            "session_id": session_id
+        })
+    except Exception as e:
+        print("Error analyzing PDF:", e)
+        return jsonify({"error": str(e)}), 500
 
 @app.route("/api/welcome", methods=["GET"])
 def welcome():
