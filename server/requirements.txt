@@ -1,4 +1,10 @@
 flask
 flask-cors
-jsonify
 gunicorn
+pdfplumber
+langchain
+langchain-community
+faiss-cpu
+sentence-transformers
+python-dotenv
+requests
