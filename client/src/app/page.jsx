@@ -6,7 +6,7 @@ export default function Home() {
   const [message, setMessage] = useState(null);
   useEffect(() => {
     const fetching = async () => {
-      const response = await axios.get("http://127.0.0.1:5000/api");
+      const response = await axios.get("https://flask-deploy-backend.onrender.com/api");
       if (response.status == 200) {
         console.log(response.data.message);
         setMessage(response.data.message);
